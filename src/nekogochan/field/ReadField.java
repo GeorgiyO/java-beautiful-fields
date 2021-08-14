@@ -12,8 +12,8 @@ public interface ReadField<Out> extends Supplier<Out> {
     }
 
     static <Out> ReadField<Out> dirty(Supplier<Out> getter, WriteField<?>... dependencies) {
-        var dirty = new Ref<>(false);
-        var cache = new Ref<>(getter.get());
+        var dirty = new Ref<>(true);
+        var cache = new Ref<Out>(null);
 
         var result = ReadField.of(() -> {
             if (dirty.get()) {

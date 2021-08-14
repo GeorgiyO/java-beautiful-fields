@@ -27,6 +27,11 @@ public class Field<T> implements IField<T, T> {
         return Field.of(ref);
     }
 
+    public static <T> Field<T> empty() {
+        var ref = new Ref<T>(null);
+        return Field.of(ref);
+    }
+
     @Override
     public T get() {
         return complexField.get();

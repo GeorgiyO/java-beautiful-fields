@@ -7,20 +7,18 @@ import java.time.LocalDate;
 
 class Cat {
 
-    Field<String> name;
-    Field<LocalDate> birthDay;
+    final Field<String> name = Field.empty();
+    final Field<LocalDate> birthDay = Field.empty();
 
-    ReadField<LocalDate> age;
+    final ReadField<LocalDate> age = ReadField.dirty(() -> {
+        System.out.println("Calculating age");
+        var now = LocalDate.now().toEpochDay();
+        return LocalDate.ofEpochDay(now - birthDay.get().toEpochDay());
+    }, birthDay);
 
-    public Cat(String _name, LocalDate _birthDay) {
-        this.name = Field.of(_name);
-        this.birthDay = Field.of(_birthDay);
-
-        this.age = ReadField.dirty(() -> {
-            System.out.println("Calculating age");
-            var now = LocalDate.now().toEpochDay();
-            return LocalDate.ofEpochDay(now - birthDay.get().toEpochDay());
-        }, birthDay);
+    public Cat(String name, LocalDate birthDay) {
+        this.name.set(name);
+        this.birthDay.set(birthDay);
     }
 
     @Override
@@ -42,10 +40,9 @@ public class Main {
 
         var cat = new Cat("Tomas", LocalDate.of(2004, 11, 13));
 
-        for (int i = 0; i < 5; i++) {
-            System.out.println(cat.age.get());
-        }
-
-        System.out.println(cat);
+        System.out.println(cat.age.get());  // prints 'Calculating age'
+        System.out.println(cat.age.get());
+        cat.birthDay.set(LocalDate.of(2008, 11, 13));
+        System.out.println(cat.age.get());  // prints 'Calculating age'
     }
 }
