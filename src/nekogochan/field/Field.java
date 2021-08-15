@@ -1,5 +1,6 @@
 package nekogochan.field;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Field<T> implements IField<T, T> {
@@ -48,7 +49,42 @@ public class Field<T> implements IField<T, T> {
     }
 
     @Override
+    public void setReadSource(Supplier<T> getter) {
+        complexField.setReadSource(getter);
+    }
+
+    @Override
+    public Supplier<T> getReadSource() {
+        return complexField.getReadSource();
+    }
+
+    @Override
     public Decorator<T> writeDecorator() {
         return complexField.writeDecorator();
+    }
+
+    @Override
+    public void setWriteEndpoint(Consumer<T> setter) {
+        complexField.setWriteEndpoint(setter);
+    }
+
+    @Override
+    public void onValueSet(Consumer<T> listener) {
+        complexField.onValueSet(listener);
+    }
+
+    @Override
+    public void removeOnValueSetListener(Consumer<T> listener) {
+        complexField.removeOnValueSetListener(listener);
+    }
+
+    @Override
+    public Consumer<T> getWriteEndpoint() {
+        return complexField.getWriteEndpoint();
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(get());
     }
 }

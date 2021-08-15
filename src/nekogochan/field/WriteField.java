@@ -1,22 +1,54 @@
 package nekogochan.field;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public interface WriteField<In> extends Setter<In> {
 
     Decorator<In> writeDecorator();
 
+    void setWriteEndpoint(Consumer<In> setter);
+
+    void onValueSet(Consumer<In> listener);
+
+    void removeOnValueSetListener(Consumer<In> listener);
+
+    Consumer<In> getWriteEndpoint();
+
     static <In> WriteField<In> of(Consumer<In> setter) {
-        return new WriteFieldImp<>(setter);
+        return new WriteFieldImpl<>(setter);
     }
 }
 
-class WriteFieldImp<In> implements WriteField<In> {
+class WriteFieldImpl<In> implements WriteField<In> {
 
     public final Decorator<In> decorator = new Decorator<>();
-    private final Consumer<In> setter;
+    private Consumer<In> setter;
+    private final List<Consumer<In>> listeners = new CopyOnWriteArrayList<>();
 
-    public WriteFieldImp(Consumer<In> setter) {
+    @Override
+    public void setWriteEndpoint(Consumer<In> setter) {
+        this.setter = setter;
+    }
+
+    @Override
+    public void onValueSet(Consumer<In> listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeOnValueSetListener(Consumer<In> listener) {
+        listeners.remove(listener);
+    }
+
+    @Override
+    public Consumer<In> getWriteEndpoint() {
+        return setter;
+    }
+
+    public WriteFieldImpl(Consumer<In> setter) {
         this.setter = setter;
     }
 
@@ -27,6 +59,8 @@ class WriteFieldImp<In> implements WriteField<In> {
 
     @Override
     public void set(In value) {
-        setter.accept(decorator.get().apply(value));
+        var result = decorator.get().apply(value);
+        setter.accept(result);
+        listeners.forEach((c) -> c.accept(result));
     }
 }
